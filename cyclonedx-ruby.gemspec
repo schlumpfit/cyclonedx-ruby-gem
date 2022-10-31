@@ -12,6 +12,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = 'https://github.com/CycloneDX/cyclonedx-ruby-gem'
   spec.license     = 'Apache-2.0'
   spec.executables << 'cyclonedx-ruby'
+  spec.add_dependency('activesupport', '~> 7')
   spec.add_dependency('json', '~> 2.2')
   spec.add_dependency('nokogiri', '~> 1.8')
   spec.add_dependency('ostruct', '~> 0.1')
