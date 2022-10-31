@@ -22,6 +22,7 @@
 #
 # frozen_string_literal: true
 
+require 'uri'
 require_relative 'bom_component'
 
 def purl(name, version)
@@ -92,15 +93,30 @@ def build_bom_xml(gems)
   builder.to_xml
 end
 
-def get_gem(name, version)
-  url = "https://rubygems.org/api/v1/versions/#{name}.json"
-  begin
-    RestClient.proxy = ENV['http_proxy']
-    response = RestClient.get(url)
-    body = JSON.parse(response.body)
-    body.select { |item| item['number'] == version.to_s }.first
-  rescue StandardError
-    @logger.warn("#{name} couldn't be fetched")
-    nil
-  end
+# Request gem information from the `api/v1/versions/<gem-name>.json` endpoint.
+#
+# @param [String] name The name of the gem of interest.
+# @param [String] version The version of the gem of interest.
+# @param [URI::] The ablsolute url to the api endpoint.
+# @return [Hash|nil] The gem object containing additional information.
+def get_gem(name, version, api)
+  url = "#{api}/#{name}.json"
+  RestClient.proxy = ENV['http_proxy']
+  response = RestClient.get(url)
+  body = JSON.parse(response.body)
+  body.select { |item| item['number'] == version.to_s }.first
+rescue StandardError => e
+  @logger.error("Failed to fetch gem info for: #{name} from: #{url} due to: #{e}.")
+  nil
+end
+
+# Read the gemserver url from environment.
+# env: CDX_RUBY_GEM_API
+# default: https://rubygems.org/api/v1/versions/
+#
+# @return [Object] One of URI's subclasses like URI::HTTP(S).
+def gem_api
+  URI.parse(ENV.fetch('CDX_RUBY_GEM_API', 'https://rubygems.org/api/v1/versions'))
+rescue StandardError
+  abort('Invalid CDX_RUBY_GEM_API url provided.')
 end

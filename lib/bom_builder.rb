@@ -104,6 +104,8 @@ class Bombuilder
                     end
 
     @gems = []
+    @gem_api = gem_api
+
     licenses_file = File.read "#{__dir__}/licenses.json"
     @licenses_list = JSON.parse(licenses_file)
 
@@ -161,7 +163,7 @@ class Bombuilder
       object.name = dependency.name
       object.version = dependency.version
       object.purl = purl(object.name, object.version)
-      gem = get_gem(object.name, object.version)
+      gem = get_gem(object.name, object.version, @gem_api)
       next if gem.nil?
 
       if gem['licenses']&.length&.positive?
