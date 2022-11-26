@@ -164,19 +164,20 @@ class Bombuilder
       object.version = dependency.version
       object.purl = purl(object.name, object.version)
       gem = get_gem(object.name, object.version, @gem_api)
-      next if gem.nil?
+      if gem
 
-      if gem['licenses']&.length&.positive?
-        if @licenses_list.include? gem['licenses'].first
-          object.license_id = gem['licenses'].first
-        else
-          object.license_name = gem['licenses'].first
+        if gem['licenses']&.length&.positive?
+          if @licenses_list.include? gem['licenses'].first
+            object.license_id = gem['licenses'].first
+          else
+            object.license_name = gem['licenses'].first
+          end
         end
-      end
 
-      object.author = gem['authors']
-      object.description = gem['summary']
-      object.hash = gem['sha']
+        object.author = gem['authors']
+        object.description = gem['summary']
+        object.hash = gem['sha']
+      end
       @gems.push(object)
       count += 1
       @logger.info("#{object.name}:#{object.version} gem added")
